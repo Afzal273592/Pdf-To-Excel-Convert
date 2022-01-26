@@ -1,0 +1,113 @@
+Sub PDF_To_Excel_Final()
+
+
+With Application
+    .DisplayAlerts = False
+    .EnableEvents = False
+    .ScreenUpdating = False
+    .DisplayStatusBar = False
+    .EnableCancelKey = xlDisabled
+End With
+
+
+Dim setting_sh As Worksheet
+Set setting_sh = ThisWorkbook.Sheets("Setting")
+
+Dim Filepath As String
+Dim excel_path As String
+
+Filepath = setting_sh.Range("E11").Value & "\"
+excel_path = setting_sh.Range("E12").Value & "\"
+
+Dim fso As New FileSystemObject
+
+
+Dim fn As Variant
+Dim newFilename As String
+
+
+Dim wApp As Object
+Dim doc As Object
+Dim wr As Object
+
+Set wApp = CreateObject("word.application")
+ 
+ Dim Path As String
+ 
+ 
+ Path = "E:\Disk 2\VBA Learning\PDF To Excel\Pdf"
+
+ChDir Path
+    fn = Application.GetOpenFilename("All files,*.*,Excel-files,*.xls,Word Files,*.doc,PDF Files,*.pdf,", _
+        1, "Technician Technical Information - Select folder and file to open", , False)
+    
+    If TypeName(fn) = "Boolean" Then Exit Sub
+    ' the user didn't select a file
+
+
+
+Dim arr() As String
+    arr = Split(fn, "\")
+    newFilename = arr(UBound(arr))
+    newFilename = Replace(newFilename, ".pdf", "")
+    newFilename = Replace(newFilename, ".PDF", "")
+
+wApp.Visible = True
+
+
+Dim NewBook As Workbook
+Dim NewSheet As Worksheet
+
+
+    Application.Wait Now + 0.00001
+    Set doc = wApp.documents.Open(fn, ReadOnly:=True)
+    Set wr = doc.Paragraphs(1).Range
+    wr.WholeStory
+    
+    
+    Set NewBook = Workbooks.Add
+    Set NewSheet = NewBook.Sheets(1)
+
+    wr.Copy
+
+        NewSheet.Activate
+        Application.CutCopyMode = False
+        Application.DisplayAlerts = False
+        Application.ScreenUpdating = False
+        
+       Application.Wait Now + 0.00001
+      ' NewBook.Sheets(1).Paste
+        
+        
+    NewBook.Sheets(1).Paste
+    'NewBook.SaveAs (excel_path & "\" & Replace(fn.Name, ".pdf", ".xlsx"))
+    Application.CutCopyMode = False
+    Application.DisplayAlerts = False
+    NewBook.Activate
+
+  
+    NewBook.SaveAs fileName:=Filepath & newFilename & "_" & Format(Now, "DD-MM-YYYY") & ".xlsx", FileFormat:=xlOpenXMLWorkbook
+    
+   ' NewBook.SaveAs fileName:=Path & newFilename & ".xlsx"
+    
+    doc.Close False
+    NewBook.Close False
+    
+    
+'Next
+setting_sh.Activate
+
+wApp.Quit
+
+MsgBox "Done"
+
+
+
+With Application
+    .DisplayAlerts = True
+    .EnableEvents = True
+    .ScreenUpdating = True
+    .DisplayStatusBar = True
+End With
+
+End Sub
